@@ -1,7 +1,9 @@
-package utils
+package config
 
 import (
+	"errors"
 	"fmt"
+	"go.yaml.in/yaml/v4"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,11 +13,15 @@ const (
 	RedColor   = "\033[31m"
 	ResetColor = "\033[0m"
 	Elipse     = ".................................................."
-	ConfigDir  = ".yhm"
-	ManagerDir = ".yhm/managers"
-	ConfigFile = "yhm"
+	ConfigDir  = ".shm"
+	ManagerDir = ".shm/managers"
+	ConfigFile = "base"
 	Extention  = ".yml"
 )
+
+type Configuration interface {
+	*Config | *PackageManager
+}
 
 func GetContextLines(file []byte, targetLine int) (string, error) {
 	lines := strings.Split(string(file), "\n")
@@ -86,50 +92,44 @@ func GetFullPath(path *string) error {
 	return nil
 }
 
-func GetConfigFile(path string, profile string) ([]byte, string, error) {
-	var configFile string
-
+func GetConfigFile(path string) ([]byte, string, error) {
 	if err := GetFullPath(&path); err != nil {
 		return nil, "", err
 	}
 
-	if info, err := os.Stat(path); !info.IsDir() || err != nil {
+	if _, err := os.Stat(path); err != nil {
 		return nil, "", err
 	}
 
-	if profile != "" {
-		configFile = path + "/" + ConfigDir + "/" + ConfigFile + "-" + profile + Extention
-	} else {
-		configFile = path + "/" + ConfigDir + "/" + ConfigFile + Extention
-	}
-
-	data, err := os.ReadFile(configFile)
+	data, err := os.ReadFile(path)
 
 	if err != nil {
 		return nil, "", err
 	}
 
-	return data, configFile, nil
+	return data, path, nil
 }
 
-func GetManagerFile(path string, file string) ([]byte, string, error) {
-	var managerFile string
-
-	if err := GetFullPath(&path); err != nil {
-		return nil, "", err
-	}
-
-	if info, err := os.Stat(path); !info.IsDir() || err != nil {
-		return nil, "", err
-	}
-
-	managerFile = path + "/" + ManagerDir + "/" + file + Extention
-
-	data, err := os.ReadFile(managerFile)
+func GetFromFile[T Configuration](path string, config T) {
+	data, path, err := GetConfigFile(path)
 
 	if err != nil {
-		return nil, "", err
+		fmt.Printf("%s", err)
+		os.Exit(1)
 	}
 
-	return data, managerFile, nil
+	if err := yaml.Unmarshal(data, config); err != nil {
+		var te *yaml.TypeError
+		if errors.As(err, &te) {
+			for _, ue := range te.Errors {
+				str, clerr := GetContextLines(data, ue.Line)
+				if clerr == nil {
+					fmt.Printf("Error in: %s\n%s\n%s\n", path, str, ue.Err.Error())
+				}
+			}
+		} else {
+			fmt.Printf("%s", err)
+		}
+		os.Exit(1)
+	}
 }

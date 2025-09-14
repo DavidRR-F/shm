@@ -1,5 +1,0 @@
-name: dnf
-command: ["sudo", "dnf"]
-args: ["install", "-y"]
-packages:
-  - flatpak

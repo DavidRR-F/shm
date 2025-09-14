@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/DavidRR-F/shm/internal/utils"
 	"go.yaml.in/yaml/v4"
 )
 
@@ -33,7 +32,7 @@ func (p *DstPath) UnmarshalYAML(value *yaml.Node) error {
 		return err
 	}
 
-	if err := utils.GetFullPath(&raw); err != nil {
+	if err := GetFullPath(&raw); err != nil {
 		return err
 	}
 
@@ -68,7 +67,7 @@ func (p *SrcPath) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	fmt.Printf("%s\n", raw)
-	if err := utils.GetFullPath(&raw); err != nil {
+	if err := GetFullPath(&raw); err != nil {
 		return err
 	}
 

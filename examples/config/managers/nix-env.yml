@@ -1,6 +1,7 @@
 command: ["nix-env"]
 args: ["-iA"]
-pre-install: ["sh", "<(curl -L https://nixos.org/nix/install)", "--daemon"]
-post-install: [".", "/etc/profile.d/nix.sh"]
+install:
+  pre: ["sh", "<(curl -L https://nixos.org/nix/install)", "--daemon"]
+  post: [".", "/etc/profile.d/nix.sh"]
 packages:
   - nixpkgs.neovim

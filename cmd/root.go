@@ -8,9 +8,7 @@ import (
 	"strings"
 
 	"github.com/DavidRR-F/shm/internal/config"
-	"github.com/DavidRR-F/shm/internal/utils"
 	"github.com/spf13/cobra"
-	"go.yaml.in/yaml/v4"
 )
 
 var (
@@ -29,57 +27,24 @@ var rootCmd = &cobra.Command{
 
 func runYhm(cmd *cobra.Command, args []string) {
 	c := config.Config{}
+	p := config.Config{}
 	m := []config.PackageManager{}
 
-	data, path, err := utils.GetConfigFile(args[0], profile)
+	config.GetFromFile(args[0]+"/"+config.ConfigDir+"/"+config.ConfigFile+config.Extention, &c)
 
-	if err != nil {
-		fmt.Printf("%s", err)
-		os.Exit(1)
-	}
-
-	if err := yaml.Unmarshal(data, &c); err != nil {
-		var te *yaml.TypeError
-		if errors.As(err, &te) {
-			for _, ue := range te.Errors {
-				str, clerr := utils.GetContextLines(data, ue.Line)
-				if clerr == nil {
-					fmt.Printf("Error in: %s\n%s\n%s\n", path, str, ue.Err.Error())
-				}
-			}
-		} else {
-			fmt.Printf("%s", err)
-		}
-		os.Exit(1)
+	if profile != "" {
+		config.GetFromFile(args[0]+"/"+config.ConfigDir+"/"+profile+config.Extention, &p)
 	}
 
 	if install {
-		for _, file := range c.Managers {
-			data, path, err := utils.GetManagerFile(args[0], file)
-			if err != nil {
-				fmt.Printf("%s", err)
-				os.Exit(1)
-			}
+		for _, file := range append(c.Managers, p.Managers...) {
 			var tmp config.PackageManager
-			if err := yaml.Unmarshal(data, &tmp); err != nil {
-				var te *yaml.TypeError
-				if errors.As(err, &te) {
-					for _, ue := range te.Errors {
-						str, clerr := utils.GetContextLines(data, ue.Line)
-						if clerr == nil {
-							fmt.Printf("Error in: %s\n%s\n%s\n", path, str, ue.Err.Error())
-						}
-					}
-				} else {
-					fmt.Printf("%s", err)
-				}
-				os.Exit(1)
-			}
+			config.GetFromFile(args[0]+"/"+config.ManagerDir+"/"+file+config.Extention, &tmp)
 			m = append(m, tmp)
 		}
 	}
 
-	for _, link := range c.Links {
+	for _, link := range append(c.Links, p.Links...) {
 		if !test {
 			if err := link.CreateLink(); err != nil {
 				fmt.Printf("%s", err)
@@ -103,11 +68,11 @@ func runYhm(cmd *cobra.Command, args []string) {
 				} else {
 					fmt.Printf("\n%s: Manager installed pre-install will not be invoked (if exists)\n", manager.Name)
 				}
-				if len(manager.PreInstall) != 0 {
-					fmt.Printf("\tPre Install: %s\n", strings.Join(manager.PreInstall, " "))
+				if len(manager.Install.Pre) != 0 {
+					fmt.Printf("\tPre Install: %s\n", strings.Join(manager.Install.Pre, " "))
 				}
-				if len(manager.PostInstall) != 0 {
-					fmt.Printf("\tPost Install: %s\n", strings.Join(manager.PostInstall, " "))
+				if len(manager.Install.Post) != 0 {
+					fmt.Printf("\tPost Install: %s\n", strings.Join(manager.Install.Post, " "))
 				}
 				fmt.Printf("\tInstall: %s %s %s\n", manager.Name, strings.Join(manager.Args, " "), strings.Join(manager.Packages, " "))
 			}

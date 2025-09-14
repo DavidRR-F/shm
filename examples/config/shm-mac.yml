@@ -1,8 +1,0 @@
-links:
-  - src: ~/.dotfiles/.zshrc
-    dest: ~/.zshrc
-    exe: true
-
-managers:
-  - brew
-  - nix-env

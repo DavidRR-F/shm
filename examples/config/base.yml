@@ -3,6 +3,4 @@ links:
     dest: ~/.bashrc
 
 managers:
-  - dnf
-  - flatpak
   - nix-env

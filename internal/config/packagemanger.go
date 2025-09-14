@@ -5,28 +5,31 @@ import (
 	"os/exec"
 )
 
+type Install struct {
+	Pre  []string `yaml:"pre"`
+	Post []string `yaml:"post"`
+}
+
 type PackageManager struct {
-	Name        string   `yaml:"name"`
-	Command     []string `yaml:"command"`
-	Args        []string `yaml:"args"`
-	PreInstall  []string `yaml:"pre-install"`
-	PostInstall []string `yaml:"post-install"`
-	Packages    []string `yaml:"packages"`
+	Name     string   `yaml:"name"`
+	Command  []string `yaml:"command"`
+	Args     []string `yaml:"args"`
+	Install  Install  `yaml:"install"`
+	Packages []string `yaml:"packages"`
 }
 
 func (pm *PackageManager) InstallPackages() error {
 	if _, err := exec.LookPath(pm.Name); err != nil {
-		if len(pm.PreInstall) != 0 {
+		if len(pm.Install.Pre) != 0 {
 			if err := pm.runPreInstallCommand(); err != nil {
 				return err
 			}
-		} else {
-			return err
 		}
-	}
-
-	if err := pm.runPostInstallCommand(); err != nil {
-		return err
+		if len(pm.Install.Post) != 0 {
+			if err := pm.runPostInstallCommand(); err != nil {
+				return err
+			}
+		}
 	}
 
 	if err := pm.installPackages(); err != nil {
@@ -60,7 +63,7 @@ func (pm *PackageManager) installPackages() error {
 
 func (pm *PackageManager) runPreInstallCommand() error {
 
-	cmd := exec.Command(pm.PreInstall[0], pm.PreInstall[1:]...)
+	cmd := exec.Command(pm.Install.Pre[0], pm.Install.Pre[1:]...)
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -74,11 +77,7 @@ func (pm *PackageManager) runPreInstallCommand() error {
 
 func (pm *PackageManager) runPostInstallCommand() error {
 
-	if len(pm.PostInstall) == 0 {
-		return nil
-	}
-
-	cmd := exec.Command(pm.PostInstall[0], pm.PostInstall[1:]...)
+	cmd := exec.Command(pm.Install.Post[0], pm.Install.Post[1:]...)
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
