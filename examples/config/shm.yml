@@ -1,0 +1,8 @@
+links:
+  - src: ~/.dotfiles/.bashrc
+    dest: ~/.bashrc
+
+managers:
+  - dnf
+  - flatpak
+  - nix-env

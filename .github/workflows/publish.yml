@@ -1,0 +1,109 @@
+name: Publish Go Binary
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.24"
+
+      - name: Generate release notes
+        run: |
+
+      - name: Build
+        run: |
+          mkdir -p dist
+          VERSION=${{ github.ref_name }}
+          BINARY_NAME=yhm
+
+          for OS in linux darwin; do
+            for ARCH in amd64 arm64; do
+              FILE_NAME="${BINARY_NAME}-${OS}-${ARCH}"
+              ARCHIVE_NAME="${FILE_NAME}.tar.gz"
+              
+              GOOS=$OS GOARCH=$ARCH go build \
+                -ldflags "-X yhm/internal/version.Version=${VERSION}" \
+                -o dist/${FILE_NAME} ./cmd/yhm
+
+              tar -czf dist/${ARCHIVE_NAME} -C dist ${FILE_NAME}
+              rm dist/${FILE_NAME} 
+            done
+          done
+
+      - name: Release Notes
+        run: |
+          latest_tag_commit_sha=$(git show "$(git describe --tags "$(git rev-list --tags --max-count=1)")" --pretty=format:'%H' --quiet)
+
+          if [ -n "$latest_tag_commit_sha" ]; then
+            commits="git log ${latest_tag_commit_sha}..HEAD --all --pretty='%H'"
+          else
+            commits="got log -n 10 --all --pretty='%H'"
+          fi
+
+          echo
+
+          declare -a added_list=()
+          declare -a updated_list=()
+          declare -a removed_list=()
+
+          while read -r commit; do
+            trailers=$(git log -1 --pretty='%B' "$commit")
+
+            while IFS= read -r line; do
+              case "$line" in
+              Added:*)
+                added_list+=("${line#Added: }")
+                ;;
+              Updated:*)
+                updated_list+=("${line#Updated: }")
+                ;;
+              Removed:*)
+                removed_list+=("${line#Removed: }")
+                ;;
+              esac
+            done <<<"$trailers"
+          done < <(eval "$commits")
+
+          if [ ${#added_list[@]} -gt 0 ]; then
+            echo "### Added ✨" >> release_notes.md
+            for item in "${added_list[@]}"; do
+              echo "- $item" >> release_notes.md
+            done
+            echo >> release_notes.md
+          fi
+
+          if [ ${#updated_list[@]} -gt 0 ]; then
+            echo "### Updated 🔄" >> release_notes.md
+            for item in "${updated_list[@]}"; do
+              echo "- $item" >> release_notes.md
+            done
+            echo >> release_notes.md
+          fi
+
+          if [ ${#removed_list[@]} -gt 0 ]; then
+            echo "### Removed 🗑️" >> release_notes.md
+            for item in "${removed_list[@]}"; do
+              echo "- $item" >> release_notes.md
+            done
+            echo >> release_notes.md
+          fi
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "${{ github.ref_name }}"
+          tag_name: "${{ github.ref_name }}"
+          body_path: release_notes.md
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

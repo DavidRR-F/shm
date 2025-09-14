@@ -1,0 +1,11 @@
+name: brew
+command: ["brew"]
+args: ["install"]
+pre-install:
+  [
+    "/bin/bash",
+    "-c",
+    '"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"',
+  ]
+packages:
+  - kubectl
