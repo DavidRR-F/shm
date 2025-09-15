@@ -17,14 +17,11 @@ jobs:
         with:
           go-version: "1.24"
 
-      - name: Generate release notes
-        run: |
-
       - name: Build
         run: |
           mkdir -p dist
           VERSION=${{ github.ref_name }}
-          BINARY_NAME=yhm
+          BINARY_NAME=shm
 
           for OS in linux darwin; do
             for ARCH in amd64 arm64; do
@@ -32,8 +29,8 @@ jobs:
               ARCHIVE_NAME="${FILE_NAME}.tar.gz"
               
               GOOS=$OS GOARCH=$ARCH go build \
-                -ldflags "-X yhm/internal/version.Version=${VERSION}" \
-                -o dist/${FILE_NAME} ./cmd/yhm
+                -ldflags "-X shm/internal/version.Version=${VERSION}" \
+                -o dist/${FILE_NAME} ./cmd/shm
 
               tar -czf dist/${ARCHIVE_NAME} -C dist ${FILE_NAME}
               rm dist/${FILE_NAME} 
