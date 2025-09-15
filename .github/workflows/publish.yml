@@ -29,7 +29,7 @@ jobs:
               ARCHIVE_NAME="${FILE_NAME}.tar.gz"
               
               GOOS=$OS GOARCH=$ARCH go build \
-                -ldflags "-X shm/internal/version.Version=${VERSION}" \
+                -ldflags "-X github.com/DavidRR-F/shm/internal/version.Version=${VERSION}" \
                 -o dist/${FILE_NAME} ./cmd/shm
 
               tar -czf dist/${ARCHIVE_NAME} -C dist ${FILE_NAME}

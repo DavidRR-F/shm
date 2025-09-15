@@ -15,6 +15,6 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Get shm version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("shm-", version.Version)
+		fmt.Printf("shm-%s", version.Version)
 	},
 }
