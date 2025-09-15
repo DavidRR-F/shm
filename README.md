@@ -1,6 +1,6 @@
 # SHM (Simple Home Manager)
 
-Simple dotfile manager and package installer
+Simple dotfile manager and package installer for linux/mac
 
 ## Synopsis
 
@@ -12,7 +12,7 @@ of the platform I am using. Enter `shm`, a simple cil tool that uses yaml config
 ## Installation
 
 ```bash
-curl -sSfL https://raw.githubusercontent.com/DavidRR-F/shm/main/install.sh | sh
+curl -sSfL https://raw.githubusercontent.com/DavidRR-F/shm/main/install.sh | bash
 ```
 
 ## Usage
@@ -36,7 +36,7 @@ shm ~/dotfiles/path
 
 ### Packages Managers
 
-[Manager Configuration Examples](https://github.com/nauticale/yhm/tree/main/examples/config/managers)
+[Manager Configuration Examples](https://github.com/DavidRR-F/shm/tree/main/.shm/managers)
 
 `.shm/managers/nix-env`
 
@@ -46,16 +46,18 @@ name: nix-env
 command: ["nix-env"]
 # arguments for install command
 args: ["-iA"]
-# package manager installation command
-pre-install: ["sh", "<(curl -L https://nixos.org/nix/install)", "--daemon"]
-# commands to run before installing packages
-post-install: [".", "/etc/profile.d/nix.sh"]
+# if will be invoked if package manager not already installed
+install:
+  # package manager installation command
+  pre: ["sh", "<(curl -L https://nixos.org/nix/install)", "--daemon"]
+  # commands to run before installing packages
+  post: [".", "/etc/profile.d/nix.sh"]
 # list of packages
 packages:
   - nixpkgs.starship
 ```
 
-`.shm/shm.yml`
+`.shm/base.yml`
 
 ```yaml
 links:
@@ -72,12 +74,12 @@ shm ~/dotfiles/path --install-packages
 
 ### Profiles
 
-`.shm/shm-mac.yml`
+`.shm/mac.yml`
 
 ```yaml
 links:
-  - src: ~/.dotfiles/nvim
-    dest: ~/Applications/Library Support/nvim
+  - src: ~/.dotfiles/lazygit
+    dest: ~/Applications/Library Support/lazygit
 
 managers:
   - brew
