@@ -39,6 +39,7 @@ jobs:
 
       - name: Release Notes
         run: |
+          touch release_notes.md
           latest_tag_commit_sha=$(git show "$(git describe --tags "$(git rev-list --tags --max-count=1)")" --pretty=format:'%H' --quiet)
 
           if [ -n "$latest_tag_commit_sha" ]; then
