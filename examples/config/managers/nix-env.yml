@@ -1,3 +1,4 @@
+name: nix-env
 command: ["nix-env"]
 args: ["-iA"]
 install:

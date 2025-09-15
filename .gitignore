@@ -41,5 +41,5 @@ tmp/
 
 # Environment files
 .env
-.yhm
+.shm
 dist/

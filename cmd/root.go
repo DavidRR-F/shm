@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -74,7 +73,7 @@ func runYhm(cmd *cobra.Command, args []string) {
 				if len(manager.Install.Post) != 0 {
 					fmt.Printf("\tPost Install: %s\n", strings.Join(manager.Install.Post, " "))
 				}
-				fmt.Printf("\tInstall: %s %s %s\n", manager.Name, strings.Join(manager.Args, " "), strings.Join(manager.Packages, " "))
+				fmt.Printf("\tInstall: %s %s %s\n", strings.Join(manager.Command, " "), strings.Join(manager.Args, " "), strings.Join(manager.Packages, " "))
 			}
 		}
 	}

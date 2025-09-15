@@ -66,7 +66,6 @@ func (p *SrcPath) UnmarshalYAML(value *yaml.Node) error {
 		return err
 	}
 
-	fmt.Printf("%s\n", raw)
 	if err := GetFullPath(&raw); err != nil {
 		return err
 	}
