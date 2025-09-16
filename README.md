@@ -40,6 +40,8 @@ curl -sSfL https://raw.githubusercontent.com/DavidRR-F/shm/main/install.sh | bas
 
 ## 💡Usage
 
+For examples, you can view my personal [shm configurations](https://github.com/DavidRR-F/dotfiles/tree/main/.shm)
+
 ### 🗂️File Structure
 
 Create your shm configuration in your dotfiles directory
@@ -57,8 +59,6 @@ Create your shm configuration in your dotfiles directory
 | **.shm/base.yml** | base shm configuration for common configurations between os's or single configuration (Can be empty) |
 | **.shm/<profile>.yml** | additional profiles configurations that can be added to base configuration |
 | **.shm/managers/<manager>.yml** | manager object configuration defines for package managers |
-
-For examples, you can view my personal [shm configurations](https://github.com/DavidRR-F/dotfiles/tree/main/.shm)
 
 ### 🔗 Dotfile Linking
 
