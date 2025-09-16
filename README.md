@@ -1,25 +1,68 @@
-# SHM (Simple Home Manager)
+# 📦 SHM (Simple Home Manager)
 
-Simple dotfile manager and package installer for linux/mac
+**A simple dotfile manager and package manager wrapper for Linux/macOS**
 
-## Synopsis
+Define symbolic links for multiple os profiles, and install packages from multiple package managers like
 
-`Stow` is great, but it doesn't help you manager your user/system packages and `Nix Home Manager` does but, if you are not using `NixOS`,
-the management plan becomes overly complex. I just wanted a simple tool that will link my dotfiles and install any package I want from
-any package manager I want with a single command so that setting up my development environment on new devices/vm is one command regardless
-of the platform I am using. Enter `shm`, a simple cil tool that uses yaml configurations to initialize your workstations.
+| Package Manager | Icon |
+|-----------------|:----:|
+| **nix-env**     | 🧪   |
+| **brew**        | 🍺   |
+| **apt**         | 🐧   |
+| **dnf**         | 🔧   |
+| **flatpak**     | 📦   |
+| **snap**        | 📦   |
 
-## Installation
+> [!WARN] still testing package manager wrapper configurations may not work will all managers
+---
+
+## 📌 Synopsis
+
+`stow` is great for symlinking dotfiles, but it doesn't help manage your system or user packages.  
+Meanwhile, `Nix Home Manager` does this — but if you're not on NixOS, things can get overly complex.
+
+I just wanted a **simple tool** to:
+- ✅ Link dotfiles
+- ✅ Install packages from **any** package manager
+
+So I made **`shm`** — a lightweight CLI tool that uses **YAML** configuration to initialize your dev environment in seconds.
+---
+
+## ⚙️ Installation
+
+Run the following installation script
 
 ```bash
 curl -sSfL https://raw.githubusercontent.com/DavidRR-F/shm/main/install.sh | bash
 ```
 
-## Usage
+> [!HINT] This script installs the executable in your `~/.local/bin` by default to remain user scoped
 
-### Links
+## 💡Usage
 
-`.shm/shm.yml`
+### 🗂️File Structure
+
+Create your shm configuration in your dotfiles directory
+
+```bash
+.shm/
+├── base.yml
+├── <profile>.yml
+└── managers/
+    └── <manager>.yml
+```
+
+| File/Directory | Description |
+|:---------------|:------------|
+| **.shm/base.yml** | base shm configuration for common configurations between os's or single configuration (Can be empty) |
+| **.shm/<profile>.yml** | additional profiles configurations that can be added to base configuration |
+| **.shm/managers/<manager>.yml** | manager object configuration defines for package managers |
+
+For examples, you can view my personal [shm configurations](https://github.com/DavidRR-F/dotfiles/tree/main/.shm)
+
+### 🔗 Dotfile Linking
+
+You can define symbolic link definitions in your `base.yml` or `<profile>.yml`
 
 ```yaml
 links:
@@ -27,37 +70,36 @@ links:
     dest: ~/.bashrc
   - src: ~/.dotfiles/myscript.sh 
     dest: ~/.local/bin/myscript
-    exe: true
+    exe: true # makes file execute
 ```
 
 ```bash
 shm ~/dotfiles/path
 ```
 
-### Packages Managers
+### 📦 Packages Managers
 
-[Manager Configuration Examples](https://github.com/DavidRR-F/shm/tree/main/.shm/managers)
-
-`.shm/managers/nix-env`
+In your managers directory you can define manager yaml object
 
 ```yaml
-# package manager name
+# package manager name (must match file name and be executable)
 name: nix-env
 command: ["nix-env"]
 # arguments for install command
 args: ["-iA"]
-# if will be invoked if package manager not already installed
+# Nested commands will be invoked if package manager not already installed
 install:
   # package manager installation command
   pre: ["sh", "<(curl -L https://nixos.org/nix/install)", "--daemon"]
-  # commands to run before installing packages
+  # commands to run after package manager installation
   post: [".", "/etc/profile.d/nix.sh"]
-# list of packages
+# list of packages to install
 packages:
   - nixpkgs.starship
+  - nixpkgs.lazygit
 ```
 
-`.shm/base.yml`
+You can then add the manager(s) references to your `base.yml` or `<profile>.yml` configurations
 
 ```yaml
 links:
@@ -68,13 +110,17 @@ managers:
   - nix-env
 ```
 
+By default, only links are applied when running shm, add the `install-packages` flag to additionally defined install packages
+
 ```bash
 shm ~/dotfiles/path --install-packages
 ```
 
-### Profiles
+### 🧩 Profiles
 
-`.shm/mac.yml`
+You are able do define profile files in your `.shm` configuration
+
+Example: `.shm/mac.yml`
 
 ```yaml
 links:
@@ -85,20 +131,16 @@ managers:
   - brew
 ```
 
+When running *shm* you can specify a profile and those configuration will be added to your *base* configuration
+
 ```bash
-shm ~/dotfiles/path --profile mac
+shm ~/dotfiles/path --profile mac --install-packages
 ```
 
-### Development
+### 🧪 Dry Run
 
-copy the examples config to as a yhm in the project base directory
-
-```bash
-cp -R examples/config .shm
-```
-
-run the following to invoke the cli from source
+You can preview what shm will do without making changes using `--dry-run`.
 
 ```bash
-go run ./cmd/yhm/main.go . --dry-run
+shm ~/dotfiles/path -i -p mac --dry-run
 ```
