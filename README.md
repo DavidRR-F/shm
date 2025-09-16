@@ -73,6 +73,8 @@ links:
     exe: true # makes file execute
 ```
 
+Simply run shm on your dotfile base directory to apply the links in your `base.yml`
+
 ```bash
 shm ~/dotfiles/path
 ```
@@ -102,10 +104,6 @@ packages:
 You can then add the manager(s) references to your `base.yml` or `<profile>.yml` configurations
 
 ```yaml
-links:
-  ...
-
-# list of package managers
 managers:
   - nix-env
 ```
